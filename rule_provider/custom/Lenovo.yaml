@@ -1,3 +1,11 @@
 payload:
   - DOMAIN-SUFFIX,lenovo.com
   - DOMAIN-KEYWORD,lenovo
+  - DOMAIN-SUFFIX,mot.com
+  - DOMAIN-KEYWORD,mot
+  - DOMAIN-SUFFIX,motorola.com
+  - DOMAIN-KEYWORD,motorola
+  - IP-CIDR,10.110.7.12/32
+  - IP-CIDR,10.178.35.21/32
+  - IP-CIDR,10.178.35.30/32
+  - IP-CIDR,10.195.6.168/32
