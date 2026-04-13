@@ -1,46 +1,23 @@
----
-#==========================================================
-# Clash Meta (mihomo) 完整配置
-# 所有规则集统一从 zhuxu222/proxy_config 仓库加载
-#==========================================================
 
-#----------------------------------------------------------
-# 代理节点 (Proxies)
-# 定义所有用于科学上网的实际服务器节点
-#----------------------------------------------------------
 proxies:
   # 这是一个 VLESS + REALITY 的节点配置
 - name: nube_1
   type: vless
-  # 服务器 IP 或域名
-  server: <PROXY_SERVER>
-  # 代理端口
-  port: 13002
-  # 用户识别码
-  uuid: <PROXY_UUID>
-  # 开启 UDP 支持 (玩游戏、看视频、QUIC必备)
-  udp: true
-  # 开启 XUDP (更高级的 UDP 转发，提升稳定性)
-  xudp: true
-  # 是否跳过证书严重 (为了安全建议 false)
-  skip-cert-verify: false
-  # 开启 TLS 加密
-  tls: true
-  # TLS 指纹模拟，伪装成 Chrome 浏览器流量特征
-  client-fingerprint: chrome
-  # SNI (Server Name Indication)，REALITY 用于伪装的目标域名
-  servername: <REALITY_SNI>
-  # 底层传输协议
-  network: tcp
+  server: 3x-ui.npm.nube.zzxh.top   # 服务器 IP 或域名
+  port: 13002                       # 代理端口
+  uuid: 52fc1643-221c-4ba4-b070-b9f885c1f22f # 用户识别码
+  udp: true                         # 开启 UDP 支持 (玩游戏、看视频、QUIC必备)
+  xudp: true                        # 开启 XUDP (更高级的 UDP 转发，提升稳定性)
+  skip-cert-verify: false           # 是否跳过证书严重 (为了安全建议 false)
+  tls: true                         # 开启 TLS 加密
+  client-fingerprint: chrome        # TLS 指纹模拟，伪装成 Chrome 浏览器流量特征
+  servername: www.icloud.com        # SNI (Server Name Indication)，REALITY 用于伪装的目标域名
+  network: tcp                      # 底层传输协议
   reality-opts:
-    # REALITY 公钥
-    public-key: <REALITY_PUBLIC_KEY>
-    # REALITY 短 ID
-    short-id: "<REALITY_SHORT_ID>"
-  # 优先通过 IPv4 连接该节点
-  ip-version: ipv4-prefer
-  # 是否开启 TCP Fast Open (可能导致某些网络环境下断流，默认关)
-  tfo: false
+    public-key: 3MDRxq_P94durEE-8yINSErT1GZRpUhoNGWu6adoMD4 # REALITY 公钥
+    short-id: "747dbb93e1b2"        # REALITY 短 ID
+  ip-version: ipv4-prefer           # 优先通过 IPv4 连接该节点
+  tfo: false                        # 是否开启 TCP Fast Open (可能导致某些网络环境下断流，默认关)
 
 #----------------------------------------------------------
 # 代理组 (Proxy Groups)
@@ -61,8 +38,7 @@ proxy-groups:
   type: url-test
   proxies:
   - nube_1
-  # 测速目标网址，通常使用 204 HTTP 状态码的极速服务
-  url: http://cp.cloudflare.com/generate_204
+  url: http://cp.cloudflare.com/generate_204 # 测速目标网址，通常使用 204 HTTP 状态码的极速服务
   interval: 600
   tolerance: 150
 
@@ -312,250 +288,6 @@ proxy-groups:
   - Proxy
   - DIRECT
   - nube_1
-
-#----------------------------------------------------------
-# DNS 配置
-# Clash 内置的 DNS 服务器配置，决定如何解析域名
-#----------------------------------------------------------
-dns:
-  # ---- DNS 总开关 ----
-  enable: true
-  # 是否允许解析 IPv6 的 AAAA 记录
-  ipv6: true
-  # ---- DNS 模式 ----
-  # 可选值：
-  #   fake-ip: 把域名劫持为假 IP 返回给客户端，请求到达 Clash 后再去真正解析代理（极速首字节，推荐）
-  #   redir-host: 直接进行真实解析并返回给客户端，然后按照规则分流（兼容性较好，但有污染风险和额外延迟）
-  # 注：目前这里配的是 redir-host，考虑到性能，未来如果无兼容问题，建议换成 fake-ip
-  enhanced-mode: redir-host
-  # DNS 监听地址，供本地或局域网设备作为 DNS 服务器使用
-  listen: 0.0.0.0:7874
-  # 是否遵守规则进行 DNS 解析策略路由
-  respect-rules: true
-  
-  # ---- 国内 DNS (NameServer) ----
-  # 用于解析国内域名和规则匹配前的一些基础解析
-  # 通常配置国内 UDP 快发 DNS 和 DoH 防污染 DNS
-  nameserver:
-  # 腾讯公共 DNS (UDP)
-  - 119.29.29.29
-  # 腾讯公共 DNS (UDP)
-  - 119.28.28.28
-  # 阿里公共 DNS (UDP)
-  - 223.5.5.5
-  # 腾讯公共 DoH
-  - https://doh.pub/dns-query
-  # 阿里公共 DoH
-  - https://dns.alidns.com/dns-query
-  
-  # ---- 海外 DNS (Fallback) ----
-  # 用于解析海外域名。如果在 nameserver 解析出来的 IP 是海外（依据 GeoIP），
-  # 或者匹配了需要走代理的规则，就会采用这里的配置通过代理隧道去解析，防止 DNS 污染。
-  fallback:
-  # Google DoH
-  - https://dns.google/dns-query
-  # Cloudflare DoH
-  - https://dns.cloudflare.com/dns-query
-  
-  # ---- 默认 DNS ----
-  # 用于解析 nameserver 和 fallback 中 DoH 的域名本身（比如 dns.google 必须先解析才能连）
-  # 必须写原生的纯 IP 地址
-  default-nameserver:
-  - 114.114.114.114
-  - 119.29.29.29
-  - 223.5.5.5
-  
-  # ---- 代理节点专属 DNS ----
-  # 专门用于解析你的代理节点域名（例如 <PROXY_SERVER>）的 DNS
-  proxy-server-nameserver:
-  - 114.114.114.114
-  - 119.29.29.29
-  - 8.8.8.8
-  - 1.1.1.1
-
-#----------------------------------------------------------
-# 通用设置
-#----------------------------------------------------------
-
-# ---- 运行模式 ----
-# 决定 Clash 如何处理流量
-# 可选值：
-#   rule   = 规则模式（根据 rules 节逐条匹配决定走代理还是直连，最常用）
-#   global = 全局代理（所有流量强制走 Proxy 组，调试用）
-#   direct = 全局直连（所有流量不走代理，相当于关闭代理）
-mode: rule
-
-# ---- 局域网访问 ----
-# 是否允许局域网内其他设备通过此 Clash 实例代理上网
-# 路由器场景必须设为 true，否则其他设备无法使用代理
-# 设为 false 则仅本机可用
-allow-lan: true
-
-# ---- 外部控制 API ----
-# RESTful API 监听地址，供 Web UI 和第三方工具（如 Yacd、MetaCubeXD）远程管理
-# 0.0.0.0 = 监听所有网卡（局域网可访问）
-# 127.0.0.1 = 仅本机可访问
-# 端口 9090 是 Clash 默认管理端口
-# 通过 http://<路由器IP>:9090 访问 API
-external-controller: 0.0.0.0:9090
-
-# ---- API 访问密钥 ----
-# 访问外部控制 API 必须携带此密钥（相当于管理密码）
-# Web UI 首次打开时需要输入此密钥
-# 留空则无需认证（不安全）
-secret: <API_SECRET>
-
-# ---- 绑定地址 ----
-# 代理服务监听的网卡地址
-# "*" = 监听所有网卡（等同于 0.0.0.0）
-# 可指定具体 IP（如 "192.168.1.1"）只监听特定网卡
-bind-address: "*"
-
-
-# ---- TCP Keep-Alive ----
-# 维持空闲 TCP 连接的心跳配置，防止 NAT 设备或防火墙超时断开连接
-# keep-alive-interval: 心跳探测间隔（秒）
-#   每隔 15 秒发送一次 TCP Keep-Alive 探测包
-#   值太大 → 连接可能被 NAT 中间设备超时丢弃
-#   值太小 → 增加不必要的网络流量
-# keep-alive-idle: 空闲超时时间（秒）
-#   TCP 连接空闲 600 秒（10 分钟）后开始发送 Keep-Alive 探测
-#   在此之前如果有数据传输则重置计时器
-keep-alive-interval: 15
-keep-alive-idle: 600
-
-# ---- IPv6 全局开关 ----
-# 是否允许 Clash 处理 IPv6 流量
-# true  = 支持 IPv6 代理和 DNS 解析 AAAA 记录
-# false = 忽略所有 IPv6 流量（仅处理 IPv4）
-# 注意：此项与 dns.ipv6 独立，两者都需要 true 才能完整支持 IPv6
-ipv6: true
-
-# ---- GeoData 模式 ----
-# 控制 GEOIP/GEOSITE 规则使用的数据格式
-# true  = 使用 .dat 文件（V2Ray 格式，数据更全、更新更频繁，推荐）
-# false = 使用 .mmdb 文件（MaxMind 格式，体积小但数据可能不够全）
-# 配合 geox-url 中的下载地址使用
-geodata-mode: true
-
-# ---- GeoData 加载器 ----
-# 控制 .dat 文件的解析方式
-# 可选值：
-#   standard = 标准加载（全量加载到内存，查询快但占内存，约 50-100MB）
-#   memconservative = 内存节约模式（按需加载，省内存但首次查询慢）
-# 路由器内存充足（≥512MB）用 standard，内存紧张用 memconservative
-geodata-loader: standard
-
-# ---- TCP 并发连接 ----
-# 域名解析得到多个 IP 时，是否同时尝试连接所有 IP
-# true  = 并发连接所有解析到的 IP，选择最先成功的（Happy Eyeballs 算法）
-#         优点：大幅降低连接延迟，自动选最优 IP
-#         缺点：短暂增加连接数
-# false = 按顺序逐个尝试
-# 推荐开启，对 CDN 域名效果尤为明显
-tcp-concurrent: true
-
-# ---- 统一延迟计算 ----
-# 是否将 TLS 握手时间纳入节点延迟测量
-# true  = 延迟 = TCP 握手 + TLS 握手 + HTTP 请求（更真实反映用户感知的延迟）
-# false = 延迟 = 仅 TCP 握手时间（数值更低但不反映真实体验）
-# 推荐开启，让 url-test 自动选节点时选出真正快的节点
-unified-delay: true
-
-#----------------------------------------------------------
-# 实验性功能
-#----------------------------------------------------------
-experimental:
-  # 禁用 QUIC 的 GSO (Generic Segmentation Offload)
-  # 有些软路由网卡驱动对 GSO 兼容不好，可能导致 UDP 丢包或断流，建议为 true 禁用
-  quic-go-disable-gso: true
-
-
-#----------------------------------------------------------
-# 流量嗅探 (Sniffer)
-# 从流量中恢复真实的域名。
-# 比如 TUN 模式或 Fake-IP 模式下，底层可能只有 IP 数据，Clash 会尝试通过
-# 解析 TLS SNI 或 HTTP Host 字段，把 IP 还原回真实域名，精准匹配分流规则
-#----------------------------------------------------------
-sniffer:
-  enable: true
-  # 是否用嗅探出的域名覆盖原目标
-  override-destination: true
-  sniff:
-    QUIC:
-      ports:
-      - 443
-    TLS:
-      ports:
-      - 443
-      - 8443
-    HTTP:
-      ports:
-      - 80
-      - 8080-8880
-      override-destination: true
-  
-  # ---- 强制使用嗅探的域名 ----
-  # Netflix/AWS 等部分服务存在 CDN IP 混用情况
-  # 必须通过域名才能正确解锁，所以强制根据 TLS 分流
-  force-domain:
-  - "+.netflix.com"
-  - "+.nflxvideo.net"
-  - "+.amazonaws.com"
-  - "+.media.dssott.com"
-  
-  # ---- 跳过嗅探的域名 ----
-  # 诸如 Mijia、Apple Push 等特殊协议虽然在 443 端口
-  # 但不是标准的 TLS，或者对 SNI 敏感，嗅探会导致它断线，需要绕过
-  skip-domain:
-  - Mijia Cloud
-  - dlg.io.mi.com
-  - "+.oray.com"
-  - "+.sunlogin.net"
-  - "+.push.apple.com"
-  
-  # 强制进行反向 DNS 映射
-  force-dns-mapping: true
-  # 解析出纯 IP 请求并匹配规则
-  parse-pure-ip: true
-
-#----------------------------------------------------------
-# TUN 模式 (虚拟网卡)
-# 开启后会在系统里创建一张叫 utun 的网卡，接管系统所有流量（包括不支持设置代理的软件）
-#----------------------------------------------------------
-tun:
-  enable: true
-  # 协议栈：gvisor / system / mixed。system 性能最好
-  stack: system
-  device: utun
-  # DNS 劫持配置，将 127.0.0.1:53 的 DNS 请求劫持给 Clash 的 DNS 引擎
-  dns-hijack:
-  - 127.0.0.1:53
-  # Endpoint Independent NAT (主要针对 UDP 穿透游戏等) 
-  endpoint-independent-nat: true
-  # ---- 路由配置 ----
-  # OpenClash 这种由上层防火墙(iptables/nftables)配合的情况
-  # 下面三个最好全是 false，以避免路由表冲突死循环
-  auto-route: false
-  auto-detect-interface: false
-  auto-redirect: false
-  strict-route: false
-
-#----------------------------------------------------------
-# 配置持久化
-# 开启后，在 Web UI 里手动选择的节点，关机重启后依然保留该选择
-#----------------------------------------------------------
-profile:
-  store-selected: true
-
-
-#----------------------------------------------------------
-# 代理认证
-# 本地 HTTP/SOCKS5 代理协议所需的账密保护 (账号:密码)
-# 影响直接使用 <路由IP>:7890/7891 的设备
-#----------------------------------------------------------
-authentication:
-- Clash:<AUTH_PASSWORD>
 
 #----------------------------------------------------------
 # 规则提供者 (Rule Providers)
