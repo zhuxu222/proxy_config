@@ -16,7 +16,17 @@ proxies:
       short-id: "<REALITY_SHORT_ID>"
     ip-version: "ipv4-prefer"
     tfo: false
+  - name: "Lenovo-VPN"
+    type: http
+    server: "<LENOVO_VPN_IPV6>"
+    port: 8080
 proxy-groups:
+  - name: Lenovo-Rules
+    type: select
+    proxies:
+      - "Lenovo-VPN"
+      - DIRECT
+      - Proxy
   - name: Auto - UrlTest
     type: url-test
     proxies:

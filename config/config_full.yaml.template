@@ -42,6 +42,13 @@ proxies:
   # 是否开启 TCP Fast Open (可能导致某些网络环境下断流，默认关)
   tfo: false
 
+# 企业内网 VPN 透明代理中继节点
+- name: Lenovo-VPN
+  type: http
+  # IPv6 地址需要带有引号作为字符串，PVE 底层暗道通信
+  server: "<LENOVO_VPN_IPV6>"
+  port: 8080
+
 #----------------------------------------------------------
 # 代理组 (Proxy Groups)
 # 用于实现自动测速、主备切换、手动选择和策略分流的逻辑组
@@ -54,6 +61,14 @@ proxies:
 proxy-groups:
 
 # ---- 核心路由组 ----
+
+# 企业内网专线组
+- name: Lenovo-Rules
+  type: select
+  proxies:
+  - Lenovo-VPN
+  - DIRECT
+  - Proxy
 
 # 自动测速组 (UrlTest)
 # 每 600 秒测速一次，延迟波动在 150ms 以内不随意切换节点
@@ -588,6 +603,14 @@ rule-providers:
     path: "./rule_provider/AI_Custom"
     interval: 86400
 
+  # 联想企业内网透明代理特定规则
+  Lenovo:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/Lenovo.yaml
+    path: "./rule_provider/Lenovo"
+    interval: 86400
+
   # ====== 上游规则集 (upstream/) ======
 
   # --- 通用 ---
@@ -1056,6 +1079,7 @@ rules:
 - GEOSITE,category-public-tracker,DIRECT
 
 # 自定义规则集（最高优先级）
+- RULE-SET,Lenovo,Lenovo-Rules
 - RULE-SET,Docker,Docker
 - RULE-SET,AI Custom,AI Suite
 
