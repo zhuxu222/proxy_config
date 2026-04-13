@@ -338,23 +338,20 @@ dns:
   # 是否允许解析 IPv6 的 AAAA 记录
   ipv6: true
   # ---- DNS 模式 ----
-  # 必须使用 fake-ip！这是解决内网 NXDOMAIN 的核心。
-  # fake-ip 返回假 IP 给客户端，把真实域名解析推迟交由远端中继服务 (vm-in) 执行。
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter:
-    - '*.lan'
-    - '*.localdomain'
-    - '*.example'
-    - '*.invalid'
-    - '*.localhost'
-    - '*.test'
-    - '*.local'
-    - '*.home.arpa'
+  # 恢复为 redir-host，采用 hosts 静态映射的方式实现 "局部虚假解析"
+  enhanced-mode: redir-host
   # DNS 监听地址，供本地或局域网设备作为 DNS 服务器使用
   listen: 0.0.0.0:7874
   # 是否遵守规则进行 DNS 解析策略路由
   respect-rules: true
+
+  # 指定特定域名走自定义 DNS 服务器
+  # 解析联想等相关企业域名时，直接向内网虚拟机 (vm-in) 的 IPv6 侧信道发起 DNS 解析请求
+  # vm-in 会运行一个纯 Python 的轻量 UDP 转发脚本当作 DNS 服务端
+  nameserver-policy:
+    '+.lenovo.com': '[<LENOVO_VPN_IPV6>]:53'
+    '+.mot.com': '[<LENOVO_VPN_IPV6>]:53'
+    '+.motorola.com': '[<LENOVO_VPN_IPV6>]:53'
   
   # ---- 国内 DNS (NameServer) ----
   # 用于解析国内域名和规则匹配前的一些基础解析
