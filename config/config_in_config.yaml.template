@@ -18,7 +18,7 @@ proxies:
     tfo: false
   - name: "Lenovo-VPN"
     type: http
-    server: "<LENOVO_VPN_IPV6>"
+    server: "lenovo-inner-proxy.office.zzxh.top"
     port: 8080
 proxy-groups:
   - name: Lenovo-Rules

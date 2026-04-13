@@ -45,8 +45,8 @@ proxies:
 # 企业内网 VPN 透明代理中继节点
 - name: Lenovo-VPN
   type: http
-  # IPv6 地址需要带有引号作为字符串，PVE 底层暗道通信
-  server: "<LENOVO_VPN_IPV6>"
+  # 通过 DDNS 动态绑定的域名，实现 PVE 内部网关与跳板机解耦
+  server: lenovo-inner-proxy.office.zzxh.top
   port: 8080
 
 #----------------------------------------------------------
@@ -346,12 +346,12 @@ dns:
   respect-rules: true
 
   # 指定特定域名走自定义 DNS 服务器
-  # 解析联想等相关企业域名时，直接向内网虚拟机 (vm-in) 的 IPv6 侧信道发起 DNS 解析请求
-  # vm-in 会运行一个纯 Python 的轻量 UDP 转发脚本当作 DNS 服务端
+  # 解析联想等相关企业域名时，直接向内网虚拟机 (vm-in) 发起 DNS 解析请求
+  # vm-in 会运行一个纯 Python 的轻量 UDP 转发脚本当作 DNS 服务端并监听 5353 防劫持端口
   nameserver-policy:
-    '+.lenovo.com': '[<LENOVO_VPN_IPV6>]:53'
-    '+.mot.com': '[<LENOVO_VPN_IPV6>]:53'
-    '+.motorola.com': '[<LENOVO_VPN_IPV6>]:53'
+    '+.lenovo.com': 'lenovo-inner-proxy.office.zzxh.top:5353'
+    '+.mot.com': 'lenovo-inner-proxy.office.zzxh.top:5353'
+    '+.motorola.com': 'lenovo-inner-proxy.office.zzxh.top:5353'
   
   # ---- 国内 DNS (NameServer) ----
   # 用于解析国内域名和规则匹配前的一些基础解析
