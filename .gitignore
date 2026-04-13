@@ -1,0 +1,6 @@
+# 真实配置文件（含敏感信息）
+config/config_full.yaml
+config/config_in_config.yaml
+
+# 带注释的运行配置参考（含敏感信息）
+docs/config_running_annotated.yaml

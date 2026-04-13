@@ -1,0 +1,1025 @@
+---
+#==========================================================
+# Clash Meta (mihomo) 完整配置
+# 所有规则集统一从 zhuxu222/proxy_config 仓库加载
+#==========================================================
+
+#----------------------------------------------------------
+# 代理节点
+#----------------------------------------------------------
+proxies:
+- name: nube_1
+  type: vless
+  server: <PROXY_SERVER>
+  port: 13002
+  uuid: <PROXY_UUID>
+  udp: true
+  xudp: true
+  skip-cert-verify: false
+  tls: true
+  client-fingerprint: chrome
+  servername: <REALITY_SNI>
+  network: tcp
+  reality-opts:
+    public-key: <REALITY_PUBLIC_KEY>
+    short-id: "<REALITY_SHORT_ID>"
+  ip-version: ipv4-prefer
+  tfo: false
+
+#----------------------------------------------------------
+# 代理组
+#----------------------------------------------------------
+proxy-groups:
+
+# 核心路由组
+- name: Auto - UrlTest
+  type: url-test
+  proxies:
+  - nube_1
+  url: http://cp.cloudflare.com/generate_204
+  interval: 600
+  tolerance: 150
+
+- name: Proxy
+  type: select
+  proxies:
+  - Auto - UrlTest
+  - DIRECT
+  - nube_1
+
+- name: Domestic
+  type: select
+  proxies:
+  - DIRECT
+  - Proxy
+
+- name: Others
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - Domestic
+
+# 科技服务
+- name: Microsoft
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+
+- name: AI Suite
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: Google FCM
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: Scholar
+  type: select
+  proxies:
+  - DIRECT
+  - Proxy
+  - nube_1
+
+# 苹果服务
+- name: Apple
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: Apple TV
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+# 流媒体
+- name: Netflix
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Disney Plus
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Youtube
+  type: select
+  disable-udp: true
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: HBO Max
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Bahamut
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Discovery Plus
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: DAZN
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Spotify
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Pornhub
+  type: select
+  proxies:
+  - Global TV
+  - DIRECT
+  - nube_1
+
+- name: Bilibili
+  type: select
+  proxies:
+  - CN Mainland TV
+  - DIRECT
+  - nube_1
+
+# 游戏
+- name: Steam
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: miHoYo
+  type: select
+  proxies:
+  - DIRECT
+  - Proxy
+  - nube_1
+
+# 社交通讯
+- name: Telegram
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: Discord
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: TikTok
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+# 金融
+- name: Crypto
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: PayPal
+  type: select
+  proxies:
+  - DIRECT
+  - Proxy
+  - nube_1
+
+# 拦截
+- name: AdBlock
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+  - Proxy
+
+- name: HTTPDNS
+  type: select
+  proxies:
+  - REJECT
+  - DIRECT
+  - Proxy
+  - nube_1
+
+# 区域 TV
+- name: CN Mainland TV
+  type: select
+  proxies:
+  - DIRECT
+  - Proxy
+  - nube_1
+
+- name: Asian TV
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+- name: Global TV
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+# 工具
+- name: Speedtest
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+# 自定义：容器/开发
+- name: Docker
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
+#----------------------------------------------------------
+# DNS 配置
+#----------------------------------------------------------
+dns:
+  enable: true
+  ipv6: true
+  enhanced-mode: redir-host
+  listen: 0.0.0.0:7874
+  respect-rules: true
+  nameserver:
+  - 119.29.29.29
+  - 119.28.28.28
+  - 223.5.5.5
+  - https://doh.pub/dns-query
+  - https://dns.alidns.com/dns-query
+  fallback:
+  - https://dns.google/dns-query
+  - https://dns.cloudflare.com/dns-query
+  default-nameserver:
+  - 114.114.114.114
+  - 119.29.29.29
+  - 223.5.5.5
+  proxy-server-nameserver:
+  - 114.114.114.114
+  - 119.29.29.29
+  - 8.8.8.8
+  - 1.1.1.1
+
+#----------------------------------------------------------
+# 端口配置
+#----------------------------------------------------------
+redir-port: 7892
+tproxy-port: 7895
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+
+#----------------------------------------------------------
+# 通用设置
+#----------------------------------------------------------
+mode: rule
+allow-lan: true
+external-controller: 0.0.0.0:9090
+secret: <API_SECRET>
+bind-address: "*"
+external-ui: "/usr/share/openclash/ui"
+external-ui-name: metacubexd
+external-ui-url: https://codeload.github.com/MetaCubeX/metacubexd/zip/refs/heads/gh-pages
+keep-alive-interval: 15
+keep-alive-idle: 600
+ipv6: true
+geodata-mode: true
+geodata-loader: standard
+tcp-concurrent: true
+unified-delay: true
+
+#----------------------------------------------------------
+# 实验性功能
+#----------------------------------------------------------
+experimental:
+  quic-go-disable-gso: true
+
+#----------------------------------------------------------
+# GeoData 数据源
+#----------------------------------------------------------
+geox-url:
+  mmdb: https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb
+  geoip: https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat
+  geosite: https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat
+  asn: https://testingcf.jsdelivr.net/gh/xishang0128/geoip@release/GeoLite2-ASN.mmdb
+
+#----------------------------------------------------------
+# 流量嗅探
+#----------------------------------------------------------
+sniffer:
+  enable: true
+  override-destination: true
+  sniff:
+    QUIC:
+      ports:
+      - 443
+    TLS:
+      ports:
+      - 443
+      - 8443
+    HTTP:
+      ports:
+      - 80
+      - 8080-8880
+      override-destination: true
+  force-domain:
+  - "+.netflix.com"
+  - "+.nflxvideo.net"
+  - "+.amazonaws.com"
+  - "+.media.dssott.com"
+  skip-domain:
+  - Mijia Cloud
+  - dlg.io.mi.com
+  - "+.oray.com"
+  - "+.sunlogin.net"
+  - "+.push.apple.com"
+  force-dns-mapping: true
+  parse-pure-ip: true
+
+#----------------------------------------------------------
+# TUN 模式
+#----------------------------------------------------------
+tun:
+  enable: true
+  stack: system
+  device: utun
+  dns-hijack:
+  - 127.0.0.1:53
+  endpoint-independent-nat: true
+  auto-route: false
+  auto-detect-interface: false
+  auto-redirect: false
+  strict-route: false
+
+#----------------------------------------------------------
+# 配置持久化
+#----------------------------------------------------------
+profile:
+  store-selected: true
+
+#----------------------------------------------------------
+# NTP 时间同步
+#----------------------------------------------------------
+ntp:
+  enable: true
+  server: time.apple.com
+  port: 123
+  interval: 30
+  write-to-system: true
+
+#----------------------------------------------------------
+# 代理认证
+#----------------------------------------------------------
+authentication:
+- Clash:<AUTH_PASSWORD>
+
+#----------------------------------------------------------
+# 规则提供者
+# 全部从 zhuxu222/proxy_config 仓库加载（通过 jsDelivr CDN）
+# URL 前缀: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider
+#----------------------------------------------------------
+rule-providers:
+
+  # ====== 自定义规则集 (custom/) ======
+
+  Docker:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/Docker.yaml
+    path: "./rule_provider/Docker"
+    interval: 86400
+
+  AI Custom:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/AI.yaml
+    path: "./rule_provider/AI_Custom"
+    interval: 86400
+
+  # ====== 上游规则集 (upstream/) ======
+
+  # --- 通用 ---
+
+  AdBlock:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/AdBlock.yaml
+    path: "./rule_provider/AdBlock"
+    interval: 86400
+
+  HTTPDNS:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/HTTPDNS.yaml
+    path: "./rule_provider/HTTPDNS"
+    interval: 86400
+
+  Special:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Special.yaml
+    path: "./rule_provider/Special"
+    interval: 86400
+
+  PROXY:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Proxy.yaml
+    path: "./rule_provider/Proxy"
+    interval: 86400
+
+  Domestic:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Domestic.yaml
+    path: "./rule_provider/Domestic"
+    interval: 86400
+
+  Domestic IPs:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Domestic_IPs.yaml
+    path: "./rule_provider/Domestic_IPs"
+    interval: 86400
+
+  LAN:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/LAN.yaml
+    path: "./rule_provider/LAN"
+    interval: 86400
+
+  # --- 海外流媒体 ---
+
+  Netflix:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Netflix.yaml
+    path: "./rule_provider/Netflix"
+    interval: 86400
+
+  Spotify:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Spotify.yaml
+    path: "./rule_provider/Spotify"
+    interval: 86400
+
+  YouTube:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/YouTube.yaml
+    path: "./rule_provider/YouTube"
+    interval: 86400
+
+  Max:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Max.yaml
+    path: "./rule_provider/Max"
+    interval: 86400
+
+  Disney Plus:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Disney_Plus.yaml
+    path: "./rule_provider/Disney_Plus"
+    interval: 86400
+
+  DAZN:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/DAZN.yaml
+    path: "./rule_provider/DAZN"
+    interval: 86400
+
+  Discovery Plus:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Discovery_Plus.yaml
+    path: "./rule_provider/Discovery_Plus"
+    interval: 86400
+
+  Pornhub:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Pornhub.yaml
+    path: "./rule_provider/Pornhub"
+    interval: 86400
+
+  # --- 国内流媒体 ---
+
+  Bilibili:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Bilibili.yaml
+    path: "./rule_provider/Bilibili"
+    interval: 86400
+
+  IQ:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/IQ.yaml
+    path: "./rule_provider/IQ"
+    interval: 86400
+
+  IQIYI:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/IQIYI.yaml
+    path: "./rule_provider/IQIYI"
+    interval: 86400
+
+  Letv:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Letv.yaml
+    path: "./rule_provider/Letv"
+    interval: 86400
+
+  Netease Music:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Netease_Music.yaml
+    path: "./rule_provider/Netease_Music"
+    interval: 86400
+
+  Tencent Video:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Tencent_Video.yaml
+    path: "./rule_provider/Tencent_Video"
+    interval: 86400
+
+  Youku:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Youku.yaml
+    path: "./rule_provider/Youku"
+    interval: 86400
+
+  WeTV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/WeTV.yaml
+    path: "./rule_provider/WeTV"
+    interval: 86400
+
+  # --- 亚洲流媒体 ---
+
+  Abema TV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Abema_TV.yaml
+    path: "./rule_provider/Abema_TV"
+    interval: 86400
+
+  Bahamut:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Bahamut.yaml
+    path: "./rule_provider/Bahamut"
+    interval: 86400
+
+  DMM:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/DMM.yaml
+    path: "./rule_provider/DMM"
+    interval: 86400
+
+  encoreTVB:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/encoreTVB.yaml
+    path: "./rule_provider/encoreTVB"
+    interval: 86400
+
+  Fox+:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Fox+.yaml
+    path: "./rule_provider/Fox+"
+    interval: 86400
+
+  Hulu Japan:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Hulu_Japan.yaml
+    path: "./rule_provider/Hulu_Japan"
+    interval: 86400
+
+  Japonx:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Japonx.yaml
+    path: "./rule_provider/Japonx"
+    interval: 86400
+
+  JOOX:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/JOOX.yaml
+    path: "./rule_provider/JOOX"
+    interval: 86400
+
+  KKBOX:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/KKBOX.yaml
+    path: "./rule_provider/KKBOX"
+    interval: 86400
+
+  KKTV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/KKTV.yaml
+    path: "./rule_provider/KKTV"
+    interval: 86400
+
+  Line TV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Line_TV.yaml
+    path: "./rule_provider/Line_TV"
+    interval: 86400
+
+  myTV SUPER:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/myTV_SUPER.yaml
+    path: "./rule_provider/myTV_SUPER"
+    interval: 86400
+
+  Niconico:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Niconico.yaml
+    path: "./rule_provider/Niconico"
+    interval: 86400
+
+  ViuTV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/ViuTV.yaml
+    path: "./rule_provider/ViuTV"
+    interval: 86400
+
+  # --- 全球流媒体 ---
+
+  ABC:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/ABC.yaml
+    path: "./rule_provider/ABC"
+    interval: 86400
+
+  Amazon:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Amazon.yaml
+    path: "./rule_provider/Amazon"
+    interval: 86400
+
+  Apple Music:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Apple_Music.yaml
+    path: "./rule_provider/Apple_Music"
+    interval: 86400
+
+  Apple News:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Apple_News.yaml
+    path: "./rule_provider/Apple_News"
+    interval: 86400
+
+  Apple TV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Apple_TV.yaml
+    path: "./rule_provider/Apple_TV"
+    interval: 86400
+
+  BBC iPlayer:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/BBC_iPlayer.yaml
+    path: "./rule_provider/BBC_iPlayer"
+    interval: 86400
+
+  F1 TV:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/F1_TV.yaml
+    path: "./rule_provider/F1_TV"
+    interval: 86400
+
+  Fox Now:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Fox_Now.yaml
+    path: "./rule_provider/Fox_Now"
+    interval: 86400
+
+  Hulu:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Hulu.yaml
+    path: "./rule_provider/Hulu"
+    interval: 86400
+
+  Pandora:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Pandora.yaml
+    path: "./rule_provider/Pandora"
+    interval: 86400
+
+  PBS:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/PBS.yaml
+    path: "./rule_provider/PBS"
+    interval: 86400
+
+  Soundcloud:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Soundcloud.yaml
+    path: "./rule_provider/Soundcloud"
+    interval: 86400
+
+  # --- 服务类 ---
+
+  Telegram:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Telegram.yaml
+    path: "./rule_provider/Telegram"
+    interval: 86400
+
+  Crypto:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Crypto.yaml
+    path: "./rule_provider/Crypto"
+    interval: 86400
+
+  Discord:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Discord.yaml
+    path: "./rule_provider/Discord"
+    interval: 86400
+
+  Steam:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Steam.yaml
+    path: "./rule_provider/Steam"
+    interval: 86400
+
+  TikTok:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/TikTok.yaml
+    path: "./rule_provider/TikTok"
+    interval: 86400
+
+  Speedtest:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Speedtest.yaml
+    path: "./rule_provider/Speedtest"
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/PayPal.yaml
+    path: "./rule_provider/PayPal"
+    interval: 86400
+
+  Microsoft:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Microsoft.yaml
+    path: "./rule_provider/Microsoft"
+    interval: 86400
+
+  AI Suite:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/AI_Suite.yaml
+    path: "./rule_provider/AI_Suite"
+    interval: 86400
+
+  Apple:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Apple.yaml
+    path: "./rule_provider/Apple"
+    interval: 86400
+
+  Google FCM:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Google_FCM.yaml
+    path: "./rule_provider/Google_FCM"
+    interval: 86400
+
+  Scholar:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/Scholar.yaml
+    path: "./rule_provider/Scholar"
+    interval: 86400
+
+  miHoYo:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/upstream/miHoYo.yaml
+    path: "./rule_provider/miHoYo"
+    interval: 86400
+
+#----------------------------------------------------------
+# 分流规则
+#----------------------------------------------------------
+rules:
+
+# 特殊规则
+- GEOSITE,category-public-tracker,DIRECT
+
+# 自定义规则集（最高优先级）
+- RULE-SET,Docker,Docker
+- RULE-SET,AI Custom,AI Suite
+
+# 拦截类
+- RULE-SET,AdBlock,AdBlock
+- RULE-SET,HTTPDNS,HTTPDNS
+
+# 特殊直连
+- RULE-SET,Special,DIRECT
+
+# 海外流媒体
+- RULE-SET,Netflix,Netflix
+- RULE-SET,Disney Plus,Disney Plus
+- RULE-SET,YouTube,Youtube
+- RULE-SET,Max,HBO Max
+- RULE-SET,Spotify,Spotify
+
+# 亚洲流媒体
+- RULE-SET,Abema TV,Asian TV
+- RULE-SET,Bahamut,Bahamut
+- RULE-SET,DMM,Asian TV
+- RULE-SET,Fox+,Asian TV
+- RULE-SET,Hulu Japan,Asian TV
+- RULE-SET,IQ,Asian TV
+- RULE-SET,Japonx,Asian TV
+- RULE-SET,JOOX,Asian TV
+- RULE-SET,KKBOX,Asian TV
+- RULE-SET,KKTV,Asian TV
+- RULE-SET,Line TV,Asian TV
+- RULE-SET,myTV SUPER,Asian TV
+- RULE-SET,Niconico,Asian TV
+- RULE-SET,ViuTV,Asian TV
+
+# 全球流媒体
+- RULE-SET,ABC,Global TV
+- RULE-SET,Amazon,Global TV
+- RULE-SET,BBC iPlayer,Global TV
+- RULE-SET,DAZN,DAZN
+- RULE-SET,Discovery Plus,Discovery Plus
+- RULE-SET,encoreTVB,Global TV
+- RULE-SET,F1 TV,Global TV
+- RULE-SET,Fox Now,Global TV
+- RULE-SET,Hulu,Global TV
+- RULE-SET,Pandora,Global TV
+- RULE-SET,PBS,Global TV
+- RULE-SET,Pornhub,Pornhub
+- RULE-SET,Soundcloud,Global TV
+
+# 国内流媒体
+- RULE-SET,Bilibili,Bilibili
+- RULE-SET,IQIYI,CN Mainland TV
+- RULE-SET,Letv,CN Mainland TV
+- RULE-SET,Netease Music,CN Mainland TV
+- RULE-SET,Tencent Video,CN Mainland TV
+- RULE-SET,WeTV,CN Mainland TV
+- RULE-SET,Youku,CN Mainland TV
+
+# 服务类
+- RULE-SET,Telegram,Telegram
+- RULE-SET,Crypto,Crypto
+- RULE-SET,Discord,Discord
+- RULE-SET,Google FCM,Google FCM
+- RULE-SET,Microsoft,Microsoft
+- RULE-SET,AI Suite,AI Suite
+- RULE-SET,PayPal,PayPal
+- RULE-SET,Scholar,Scholar
+- RULE-SET,Speedtest,Speedtest
+- RULE-SET,Steam,Steam
+- RULE-SET,TikTok,TikTok
+
+# Apple 服务
+- RULE-SET,Apple Music,Apple TV
+- RULE-SET,Apple News,Apple TV
+- RULE-SET,Apple TV,Apple TV
+- RULE-SET,Apple,Apple
+- RULE-SET,miHoYo,miHoYo
+
+# 通用分流
+- RULE-SET,PROXY,Proxy
+- RULE-SET,Domestic,Domestic
+- RULE-SET,Domestic IPs,Domestic
+- RULE-SET,LAN,DIRECT
+
+# GeoIP
+- GEOIP,CN,DIRECT
+
+# 进程名规则：下载工具直连
+- PROCESS-NAME,aria2c,DIRECT
+- PROCESS-NAME,BitComet,DIRECT
+- PROCESS-NAME,fdm,DIRECT
+- PROCESS-NAME,NetTransport,DIRECT
+- PROCESS-NAME,qbittorrent,DIRECT
+- PROCESS-NAME,Thunder,DIRECT
+- PROCESS-NAME,transmission-daemon,DIRECT
+- PROCESS-NAME,transmission-qt,DIRECT
+- PROCESS-NAME,uTorrent,DIRECT
+- PROCESS-NAME,WebTorrent,DIRECT
+- PROCESS-NAME,Folx,DIRECT
+- PROCESS-NAME,Transmission,DIRECT
+- PROCESS-NAME,WebTorrent Helper,DIRECT
+
+# 进程名规则：代理工具直连（防环路）
+- PROCESS-NAME,v2ray,DIRECT
+- PROCESS-NAME,ss-local,DIRECT
+- PROCESS-NAME,ssr-local,DIRECT
+- PROCESS-NAME,ss-redir,DIRECT
+- PROCESS-NAME,ssr-redir,DIRECT
+- PROCESS-NAME,ss-server,DIRECT
+- PROCESS-NAME,trojan-go,DIRECT
+- PROCESS-NAME,xray,DIRECT
+- PROCESS-NAME,hysteria,DIRECT
+- PROCESS-NAME,singbox,DIRECT
+
+# 游戏加速器直连
+- PROCESS-NAME,UUBooster,DIRECT
+- PROCESS-NAME,uugamebooster,DIRECT
+
+# 最终兜底
+- DST-PORT,80,Others
+- DST-PORT,443,Others
+- MATCH,DIRECT

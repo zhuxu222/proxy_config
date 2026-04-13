@@ -1,0 +1,62 @@
+name: Sync Upstream Rule Providers
+on:
+  schedule:
+    - cron: '0 4 * * 1'    # 每周一 UTC 4:00（北京时间 12:00）
+  workflow_dispatch:         # 支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download upstream rule providers
+        run: |
+          BASE="https://raw.githubusercontent.com/dler-io/Rules/main/Clash/Provider"
+          DIR="rule_provider/upstream"
+          mkdir -p "$DIR"
+
+          # General rules
+          declare -a GENERAL=(
+            "AdBlock" "HTTPDNS" "Special" "Proxy" "Domestic"
+            "Domestic%20IPs" "LAN" "Telegram" "Crypto" "Discord"
+            "Steam" "TikTok" "Speedtest" "PayPal" "Microsoft"
+            "AI%20Suite" "Apple" "Google%20FCM" "Scholar" "miHoYo"
+          )
+
+          # Media rules
+          declare -a MEDIA=(
+            "Netflix" "Spotify" "YouTube" "Max" "Bilibili"
+            "IQ" "IQIYI" "Letv" "Netease%20Music" "Tencent%20Video"
+            "Youku" "WeTV" "ABC" "Abema%20TV" "Amazon"
+            "Apple%20Music" "Apple%20News" "Apple%20TV" "Bahamut"
+            "BBC%20iPlayer" "DAZN" "Discovery%20Plus" "Disney%20Plus"
+            "DMM" "encoreTVB" "F1%20TV" "Fox%20Now" "Fox%2B"
+            "Hulu%20Japan" "Hulu" "Japonx" "JOOX" "KKBOX"
+            "KKTV" "Line%20TV" "myTV%20SUPER" "Niconico" "Pandora"
+            "PBS" "Pornhub" "Soundcloud" "ViuTV"
+          )
+
+          for f in "${GENERAL[@]}"; do
+            filename=$(echo "$f" | sed 's/%20/_/g; s/%2B/+/g')
+            curl -sL "$BASE/$f.yaml" -o "$DIR/$filename.yaml" && echo "[OK] $filename" || echo "[FAIL] $filename"
+          done
+
+          for f in "${MEDIA[@]}"; do
+            filename=$(echo "$f" | sed 's/%20/_/g; s/%2B/+/g')
+            curl -sL "$BASE/Media/$f.yaml" -o "$DIR/$filename.yaml" && echo "[OK] Media/$filename" || echo "[FAIL] Media/$filename"
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add rule_provider/upstream/
+          if git diff --staged --quiet; then
+            echo "No changes detected"
+          else
+            git commit -m "chore: sync upstream rules $(date +%Y-%m-%d)"
+            git push
+          fi
