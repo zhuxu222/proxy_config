@@ -338,11 +338,19 @@ dns:
   # 是否允许解析 IPv6 的 AAAA 记录
   ipv6: true
   # ---- DNS 模式 ----
-  # 可选值：
-  #   fake-ip: 把域名劫持为假 IP 返回给客户端，请求到达 Clash 后再去真正解析代理（极速首字节，推荐）
-  #   redir-host: 直接进行真实解析并返回给客户端，然后按照规则分流（兼容性较好，但有污染风险和额外延迟）
-  # 注：目前这里配的是 redir-host，考虑到性能，未来如果无兼容问题，建议换成 fake-ip
-  enhanced-mode: redir-host
+  # 必须使用 fake-ip！这是解决内网 NXDOMAIN 的核心。
+  # fake-ip 返回假 IP 给客户端，把真实域名解析推迟交由远端中继服务 (vm-in) 执行。
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - '*.lan'
+    - '*.localdomain'
+    - '*.example'
+    - '*.invalid'
+    - '*.localhost'
+    - '*.test'
+    - '*.local'
+    - '*.home.arpa'
   # DNS 监听地址，供本地或局域网设备作为 DNS 服务器使用
   listen: 0.0.0.0:7874
   # 是否遵守规则进行 DNS 解析策略路由
