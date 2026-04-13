@@ -404,17 +404,6 @@ secret: <API_SECRET>
 # 可指定具体 IP（如 "192.168.1.1"）只监听特定网卡
 bind-address: "*"
 
-# ---- Web 管理界面 ----
-# external-ui: Web UI 静态文件存放路径（iStoreOS 上的本地目录）
-#   Clash 会在此路径提供一个 Web 界面，通过 http://<IP>:9090/ui 访问
-# external-ui-name: UI 项目名称
-#   可选值：metacubexd（推荐，功能全）、yacd（经典）、razord 等
-# external-ui-url: UI 资源自动下载地址
-#   Clash 会自动从此 URL 下载并解压 UI 文件到 external-ui 路径
-#   如果 UI 文件已存在则不会重复下载
-external-ui: "/usr/share/openclash/ui"
-external-ui-name: metacubexd
-external-ui-url: https://codeload.github.com/MetaCubeX/metacubexd/zip/refs/heads/gh-pages
 
 # ---- TCP Keep-Alive ----
 # 维持空闲 TCP 连接的心跳配置，防止 NAT 设备或防火墙超时断开连接
@@ -474,16 +463,6 @@ experimental:
   # 有些软路由网卡驱动对 GSO 兼容不好，可能导致 UDP 丢包或断流，建议为 true 禁用
   quic-go-disable-gso: true
 
-#----------------------------------------------------------
-# GeoData 数据源
-# 配置需要从哪里下载并在本地更新 GeoIP/GeoSite 数据库文件
-# （通过 CDN 极大加速国内下载）
-#----------------------------------------------------------
-geox-url:
-  mmdb: https://testingcf.jsdelivr.net/gh/alecthw/mmdb_china_ip_list@release/lite/Country.mmdb
-  geoip: https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat
-  geosite: https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat
-  asn: https://testingcf.jsdelivr.net/gh/xishang0128/geoip@release/GeoLite2-ASN.mmdb
 
 #----------------------------------------------------------
 # 流量嗅探 (Sniffer)
@@ -562,18 +541,6 @@ tun:
 profile:
   store-selected: true
 
-#----------------------------------------------------------
-# NTP 时间同步
-# 部分软路由/旁路由如果没有正确获取时间，会导致 TLS/SSL 握手因证书过期而失败
-# 开启内置 NTP 有助于稳定代理
-#----------------------------------------------------------
-ntp:
-  enable: true
-  server: time.apple.com
-  port: 123
-  interval: 30
-  # 将同步到的时间写入操作系统硬件层面
-  write-to-system: true
 
 #----------------------------------------------------------
 # 代理认证
