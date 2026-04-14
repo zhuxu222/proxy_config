@@ -43,13 +43,6 @@ proxies:
     # 是否开启 TCP Fast Open (可能导致某些网络环境下断流，默认关)
     tfo: false
 
-  # 企业内网 VPN 透明代理中继节点
-  - name: Office-Hub
-    type: http
-    # 通过 DDNS 动态绑定的域名，实现 PVE 内部网关与跳板机解耦
-    server: win-net-agent.office.zzxh.top
-    port: 8080
-
 #----------------------------------------------------------
 # 代理组 (Proxy Groups)
 # 用于实现自动测速、主备切换、手动选择和策略分流的逻辑组
@@ -62,14 +55,6 @@ proxies:
 proxy-groups:
 
   # ---- 核心路由组 ----
-
-  # 企业内网专线组
-  - name: Lenovo-Rules
-    type: select
-    proxies:
-      - Office-Hub
-      - DIRECT
-      - Proxy
 
   # 自动测速组 (UrlTest)
   # 每 600 秒测速一次，延迟波动在 150ms 以内不随意切换节点
@@ -347,26 +332,13 @@ dns:
   # 是否启用内置 DNS
   enable: true
   # 是否允许解析 IPv6 的 AAAA 记录
-  # 设为 false：Clash 对 AAAA 查询直接返回空答案 (NOERROR)，不转发到上游
-  # 原因：nameserver-policy 的上游 DNS (win-net-agent:15353) 对 AAAA 查询返回 NXDOMAIN
-  # 而非 NOERROR，导致 dnsmasq 将整个域名判定为不存在，连 A 记录也被否定
-  ipv6: false
+  ipv6: true
   # DNS 增强模式：redir-host / fake-ip
   enhanced-mode: redir-host
   # DNS 监听地址，供本地或局域网设备作为 DNS 服务器使用
   listen: 0.0.0.0:7874
   # 是否遵守规则进行 DNS 解析策略路由
   respect-rules: true
-
-  # 指定特定域名走自定义 DNS 服务器
-  # 解析联想等相关企业域名时，直接向内网虚拟机 (vm-in) 发起 DNS 解析请求
-  # vm-in 会运行一个纯 Python 的轻量 UDP 转发脚本当作 DNS 服务端并监听防劫持端口
-  # 注意：必须使用 IPv6 字面地址而非域名，因为 dns.ipv6: false 会导致
-  # win-net-agent.office.zzxh.top（仅有 AAAA 记录）无法解析
-  nameserver-policy:
-    '+.lenovo.com': '[fd3e:7070:d4dc::364]:5353'
-    '+.mot.com': '[fd3e:7070:d4dc::364]:5353'
-    '+.motorola.com': '[fd3e:7070:d4dc::364]:5353'
 
   # 国内 DNS (NameServer)
   # 用于解析国内域名和规则匹配前的一些基础解析
@@ -620,14 +592,6 @@ rule-providers:
     behavior: classical
     url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/AI.yaml
     path: "./rule_provider/AI_Custom"
-    interval: 86400
-
-  # 联想企业内网透明代理特定规则
-  Lenovo:
-    type: http
-    behavior: classical
-    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/Lenovo.yaml
-    path: "./rule_provider/Lenovo"
     interval: 86400
 
   # ====== 上游规则集 (upstream/) ======
@@ -1098,7 +1062,6 @@ rules:
   - GEOSITE,category-public-tracker,DIRECT
 
   # 自定义规则集（最高优先级）
-  - RULE-SET,Lenovo,Lenovo-Rules
   - RULE-SET,Docker,Docker
   - RULE-SET,AI Custom,AI Suite
 
