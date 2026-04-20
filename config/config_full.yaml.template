@@ -356,14 +356,21 @@ dns:
   respect-rules: true
 
   # 指定特定域名走自定义 DNS 服务器
-  # 解析联想等相关企业域名时，直接向内网虚拟机 (vm-in) 发起 DNS 解析请求
-  # vm-in 会运行一个纯 Python 的轻量 UDP 转发脚本当作 DNS 服务端并监听防劫持端口
-  # 注意：必须使用 IPv6 字面地址而非域名，因为 dns.ipv6: false 会导致
-  # win-net-agent.office.zzxh.top（仅有 AAAA 记录）无法解析
+  # 企业域名同时查询公网 DNS 和内网 VPN 转发器（并发模式），打破 DNS 循环依赖：
+  #   VPN 未连接 → 公网域名（如 VPN 网关）由 223.5.5.5 正常解析
+  #                 转发器因 DNS 环路超时，公网 DNS 胜出
+  #   VPN 已连接 → 内网域名由 LAN 转发器通过 VPN DNS 解析（延迟 ~1ms）
+  #                 比公网 DNS 返回 NXDOMAIN（~20ms）更快到达，转发器胜出
   nameserver-policy:
-    '+.lenovo.com': '[fd3e:7070:d4dc::364]:5353'
-    '+.mot.com': '[fd3e:7070:d4dc::364]:5353'
-    '+.motorola.com': '[fd3e:7070:d4dc::364]:5353'
+    '+.lenovo.com':
+      - '223.5.5.5'
+      - '[fd3e:7070:d4dc::364]:5353'
+    '+.mot.com':
+      - '223.5.5.5'
+      - '[fd3e:7070:d4dc::364]:5353'
+    '+.motorola.com':
+      - '223.5.5.5'
+      - '[fd3e:7070:d4dc::364]:5353'
 
   # 国内 DNS (NameServer)
   # 用于解析国内域名和规则匹配前的一些基础解析
