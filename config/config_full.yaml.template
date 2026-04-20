@@ -347,10 +347,7 @@ dns:
   # 是否启用内置 DNS
   enable: true
   # 是否允许解析 IPv6 的 AAAA 记录
-  # 设为 false：Clash 对 AAAA 查询直接返回空答案 (NOERROR)，不转发到上游
-  # 原因：nameserver-policy 的上游 DNS (win-net-agent:15353) 对 AAAA 查询返回 NXDOMAIN
-  # 而非 NOERROR，导致 dnsmasq 将整个域名判定为不存在，连 A 记录也被否定
-  ipv6: false
+  ipv6: true
   # DNS 增强模式：redir-host / fake-ip
   enhanced-mode: redir-host
   # DNS 监听地址，供本地或局域网设备作为 DNS 服务器使用
