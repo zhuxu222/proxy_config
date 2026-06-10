@@ -1,11 +1,62 @@
 payload:
+  # Lenovo / Motorola 企业域名优先按域名分流。
   - DOMAIN-SUFFIX,lenovo.com
   - DOMAIN-KEYWORD,lenovo
   - DOMAIN-SUFFIX,mot.com
   - DOMAIN-KEYWORD,mot
   - DOMAIN-SUFFIX,motorola.com
   - DOMAIN-KEYWORD,motorola
+  - DOMAIN-SUFFIX,blurdev.com
+
+  # dinit 脚本中出现的企业内网短主机名。
+  - DOMAIN,xmdoc
+  - DOMAIN,binfile
+
+  # 根据 VPN 内解析结果和 dinit 脚本补充的目标内网单点地址。
+  # 为降低误伤风险，仅代理已确认地址；后续发现新地址再增量添加。
+  - IP-CIDR,10.4.69.150/32
+  - IP-CIDR,10.4.69.158/32
+  - IP-CIDR,10.38.0.101/32
+  - IP-CIDR,10.38.0.111/32
+  - IP-CIDR,10.38.32.160/32
+  - IP-CIDR,10.38.32.161/32
+  - IP-CIDR,10.58.254.10/32
+  - IP-CIDR,10.62.32.100/32
+  - IP-CIDR,10.62.32.101/32
+  - IP-CIDR,10.62.100.112/32
+  - IP-CIDR,10.62.100.122/32
+  - IP-CIDR,10.64.0.101/32
+  - IP-CIDR,10.64.0.111/32
+  - IP-CIDR,10.85.218.101/32
+  - IP-CIDR,10.96.1.18/32
+  - IP-CIDR,10.96.1.19/32
+  - IP-CIDR,10.96.1.40/32
+  - IP-CIDR,10.96.1.50/32
+  - IP-CIDR,10.96.1.51/32
+  - IP-CIDR,10.96.1.52/32
+  - IP-CIDR,10.96.1.232/32
+  - IP-CIDR,10.96.1.233/32
+  - IP-CIDR,10.97.45.21/32
+  - IP-CIDR,10.97.45.22/32
+  - IP-CIDR,10.97.45.23/32
+  - IP-CIDR,10.97.45.24/32
   - IP-CIDR,10.110.7.12/32
+  - IP-CIDR,10.110.7.16/32
+  - IP-CIDR,10.114.91.181/32
+  - IP-CIDR,10.115.6.128/32
+  - IP-CIDR,10.115.6.200/32
+  - IP-CIDR,10.122.23.13/32
+  - IP-CIDR,10.122.23.213/32
+  - IP-CIDR,10.122.248.227/32
+  - IP-CIDR,10.125.159.209/32
+  - IP-CIDR,10.125.159.218/32
+  - IP-CIDR,10.128.0.101/32
+  - IP-CIDR,10.128.0.111/32
+  - IP-CIDR,10.176.20.1/32
+  - IP-CIDR,10.176.20.2/32
   - IP-CIDR,10.178.35.21/32
   - IP-CIDR,10.178.35.30/32
   - IP-CIDR,10.195.6.168/32
+
+  # Gerrit 在 VPN DNS 下解析到 100.64.45.7，先精确匹配，避免扩大 100.64.0.0/10。
+  - IP-CIDR,100.64.45.7/32
