@@ -7,8 +7,8 @@
 #   被 nftables @localnetwork 集合拦截后 return，无法进入 TUN 代理。
 #
 # 方案：
-#   从配置文件读取需要代理的内网 IP/CIDR 列表，
-#   在 @localnetwork return 之前插入 nftables 规则，
+#   从配置文件读取需要代理的内网 IP/CIDR 列表。
+#   每次执行先清理旧规则，再插入到 OpenClash mangle 链头，
 #   将匹配的流量打上 fwmark 强制进入 TUN。
 #
 # 用法：
@@ -22,6 +22,7 @@ NFT_SET_NAME="lenovo_ips"
 NFT_TABLE="inet fw4"
 FWMARK="0x00000162"
 LOG_TAG="IntranetBypass"
+RULE_COMMENT="Intranet TUN Bypass"
 MAX_RETRY=30
 RETRY_INTERVAL=2
 
@@ -33,12 +34,24 @@ log_msg() {
     fi
 }
 
-# 提取 nftables handle 编号（兼容 BusyBox grep/awk）
-get_handle() {
-    nft -a list chain $NFT_TABLE "$1" 2>/dev/null \
-        | grep "localnetwork" \
+if [ "${INTRANET_TUN_BYPASS_DISABLE:-0}" = "1" ]; then
+    log_msg "Disabled by INTRANET_TUN_BYPASS_DISABLE=1"
+    return 0 2>/dev/null || exit 0
+fi
+
+chain_exists() {
+    nft list chain $NFT_TABLE "$1" >/dev/null 2>&1
+}
+
+delete_old_rules() {
+    local chain="$1"
+    nft -a list chain $NFT_TABLE "$chain" 2>/dev/null \
+        | grep "$RULE_COMMENT" \
         | awk '{for(i=1;i<=NF;i++) if($i=="handle") print $(i+1)}' \
-        | head -1
+        | sort -rn \
+        | while read -r handle; do
+            [ -n "$handle" ] && nft delete rule $NFT_TABLE "$chain" handle "$handle" 2>/dev/null
+        done
 }
 
 # 检查配置文件
@@ -47,8 +60,13 @@ if [ ! -f "$INTRANET_LIST" ]; then
     return 1 2>/dev/null || exit 1
 fi
 
-# 从配置文件读取 IP 列表（过滤注释和空行，拼成逗号分隔）
-IP_ELEMENTS=$(grep -v '^\s*#' "$INTRANET_LIST" | grep -v '^\s*$' | tr '\n' ',' | sed 's/,$//')
+# 从配置文件读取 IP 列表：过滤注释/空行/行尾注释，去重后拼成 nft set 元素。
+IP_ELEMENTS=$(
+    sed 's/#.*$//' "$INTRANET_LIST" \
+        | awk 'NF {print $1}' \
+        | sort -u \
+        | awk 'BEGIN { out = "" } { if (out == "") out = $1; else out = out "," $1 } END { print out }'
+)
 
 if [ -z "$IP_ELEMENTS" ]; then
     log_msg "Warning: no IPs found in $INTRANET_LIST"
@@ -62,10 +80,10 @@ insert_rules() {
     local retry=0
 
     while [ $retry -lt $MAX_RETRY ]; do
-        HANDLE_M=$(get_handle openclash_mangle)
-        HANDLE_O=$(get_handle openclash_mangle_output)
+        if chain_exists openclash_mangle && chain_exists openclash_mangle_output; then
+            delete_old_rules openclash_mangle
+            delete_old_rules openclash_mangle_output
 
-        if [ -n "$HANDLE_M" ] && [ -n "$HANDLE_O" ]; then
             # 创建/重建 nftables set（O(1) 哈希匹配）
             nft add set $NFT_TABLE $NFT_SET_NAME "{ type ipv4_addr; flags interval; auto-merge; }" 2>/dev/null
             nft flush set $NFT_TABLE $NFT_SET_NAME 2>/dev/null
@@ -76,19 +94,18 @@ insert_rules() {
                 return 1
             fi
 
-            # 在 openclash_mangle 链的 @localnetwork return 之前插入规则
-            nft insert rule $NFT_TABLE openclash_mangle position "$HANDLE_M" \
+            # 插入到链头，确保在 localnetwork return 之前打 mark。
+            nft insert rule $NFT_TABLE openclash_mangle \
                 ip daddr @${NFT_SET_NAME} meta l4proto "{ tcp, udp }" \
                 meta mark set $FWMARK counter \
-                comment "\"Intranet TUN Bypass\"" 2>/dev/null
-            log_msg "mangle rule inserted (handle $HANDLE_M)"
+                comment "\"$RULE_COMMENT\"" 2>/dev/null
+            log_msg "mangle rule inserted"
 
-            # 在 openclash_mangle_output 链的 @localnetwork return 之前插入规则
-            nft insert rule $NFT_TABLE openclash_mangle_output position "$HANDLE_O" \
+            nft insert rule $NFT_TABLE openclash_mangle_output \
                 ip daddr @${NFT_SET_NAME} meta l4proto "{ tcp, udp }" \
                 meta mark set $FWMARK counter \
-                comment "\"Intranet TUN Bypass\"" 2>/dev/null
-            log_msg "mangle_output rule inserted (handle $HANDLE_O)"
+                comment "\"$RULE_COMMENT\"" 2>/dev/null
+            log_msg "mangle_output rule inserted"
 
             log_msg "Done"
             return 0

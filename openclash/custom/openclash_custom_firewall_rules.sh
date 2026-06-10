@@ -7,8 +7,9 @@
 
 LOG_OUT "Tip: Start Add Custom Firewall Rules..."
 
-# 企业内网 IP 绕过 localnetwork 限制，强制进入 TUN 代理（已改用 SSH ProxyCommand 方案）
-#SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-#. "$SCRIPT_DIR/intranet_tun_bypass.sh"
+# 企业内网 IP 绕过 localnetwork 限制，强制进入 TUN 代理。
+# OpenClash 的 localnetwork 规则会提前放行 10.x/100.64.x 等地址，导致 Lenovo VPN 规则无法命中。
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+. "$SCRIPT_DIR/intranet_tun_bypass.sh"
 
 exit 0
