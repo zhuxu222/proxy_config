@@ -12,6 +12,7 @@ proxy_config/
 ├── rule_provider/                       # 规则集
 │   ├── custom/                          # 自定义规则集
 │   │   ├── Docker.yaml                  # Docker/容器注册表域名
+│   │   ├── HuggingFace.yaml             # Hugging Face 页面与资源下载域名
 │   │   └── AI.yaml                      # AI 平台域名（补充 AI Suite）
 │   └── upstream/                        # 上游规则集（自动同步自 dler-io/Rules）
 │       ├── AdBlock.yaml
@@ -38,6 +39,7 @@ proxy_config/
 ```
 # 自定义规则集
 https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/Docker.yaml
+https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/HuggingFace.yaml
 https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/AI.yaml
 
 # 上游规则集（例）
@@ -56,8 +58,16 @@ rule-providers:
     path: "./rule_provider/Docker"
     interval: 86400
 
+  HuggingFace:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/HuggingFace.yaml
+    path: "./rule_provider/HuggingFace"
+    interval: 86400
+
 rules:
   - RULE-SET,Docker,Docker
+  - RULE-SET,HuggingFace,HuggingFace
 ```
 
 ### 刷新 CDN 缓存

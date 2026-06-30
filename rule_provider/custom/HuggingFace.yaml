@@ -1,0 +1,20 @@
+payload:
+  # Hugging Face web/API and short links.
+  - DOMAIN-SUFFIX,huggingface.co
+  - DOMAIN-SUFFIX,hf.co
+
+  # Hosted assets, user content, Spaces, and inference endpoints.
+  - DOMAIN-SUFFIX,hf.space
+  - DOMAIN-SUFFIX,hfusercontent.com
+  - DOMAIN-SUFFIX,huggingfaceusercontent.com
+
+  # Model/dataset file downloads and large-file storage.
+  - DOMAIN-SUFFIX,cdn-lfs.hf.co
+  - DOMAIN-SUFFIX,cdn-lfs-us-1.hf.co
+  - DOMAIN-SUFFIX,cdn-lfs-eu-1.hf.co
+
+  # Xet/CAS storage used by newer Hugging Face Hub downloads.
+  - DOMAIN-SUFFIX,xethub.hf.co
+  - DOMAIN-SUFFIX,cas-bridge.xethub.hf.co
+  - DOMAIN-SUFFIX,cas-server.xethub.hf.co
+  - DOMAIN-SUFFIX,transfer.xethub.hf.co

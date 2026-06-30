@@ -82,6 +82,13 @@ proxy-groups:
   - DIRECT
   - nube_1
 
+- name: HuggingFace
+  type: select
+  proxies:
+  - Proxy
+  - DIRECT
+  - nube_1
+
 - name: Google FCM
   type: select
   proxies:
@@ -312,7 +319,15 @@ rule-providers:
     path: "./rule_provider/Docker"
     interval: 86400
 
-  # AI 相关的开发/模型补充域名（如 HuggingFace 等）
+  # Hugging Face 页面、API、模型/数据集下载域名
+  HuggingFace:
+    type: http
+    behavior: classical
+    url: https://fastly.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/HuggingFace.yaml
+    path: "./rule_provider/HuggingFace"
+    interval: 86400
+
+  # AI 相关的开发/模型补充域名
   AI Custom:
     type: http
     behavior: classical
@@ -789,6 +804,7 @@ rules:
 
 # 自定义规则集（最高优先级）
 - RULE-SET,Docker,Docker
+- RULE-SET,HuggingFace,HuggingFace
 - RULE-SET,AI Custom,AI Suite
 
 # 拦截类

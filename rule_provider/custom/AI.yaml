@@ -1,7 +1,9 @@
 # AI 平台域名（补充 dler-io AI Suite）
 # dler-io AI Suite 已覆盖 ChatGPT/Claude/Gemini 等 API 域名
-# 此规则集补充模型下载、数据集平台等
+# Hugging Face 使用独立规则集，便于单独手动选择 Proxy/DIRECT
 payload:
+  # Compatibility fallback. The dedicated HuggingFace rule-set has higher
+  # priority in config files, so normal traffic is still routed by HuggingFace.
   - DOMAIN-SUFFIX,huggingface.co
   - DOMAIN-SUFFIX,hf.co
   - DOMAIN-SUFFIX,hfusercontent.com
