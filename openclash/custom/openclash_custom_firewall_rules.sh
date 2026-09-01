@@ -12,4 +12,7 @@ LOG_OUT "Tip: Start Add Custom Firewall Rules..."
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_DIR/intranet_tun_bypass.sh"
 
+# 企业域名解析结果由 dnsmasq 自动加入动态 nft set。
+. "$SCRIPT_DIR/lenovo_dns_nftset.sh"
+
 exit 0

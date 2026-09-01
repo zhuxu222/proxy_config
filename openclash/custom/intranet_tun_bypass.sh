@@ -1,19 +1,9 @@
 #!/bin/sh
 # ============================================================
-# 企业内网 IP 绕过 localnetwork 限制脚本
+# 企业内网静态 IP 绕过 localnetwork 限制脚本
 #
-# 问题：
-#   企业内网域名（如 *.lenovo.com, *.mot.com）解析到私网 IP，
-#   被 nftables @localnetwork 集合拦截后 return，无法进入 TUN 代理。
-#
-# 方案：
-#   从配置文件读取需要代理的内网 IP/CIDR 列表。
-#   每次执行先清理旧规则，再插入到 OpenClash mangle 链头，
-#   将匹配的流量打上 fwmark 强制进入 TUN。
-#
-# 用法：
-#   sh intranet_tun_bypass.sh [配置文件路径]
-#   默认配置文件：同目录下的 lenovo_intranet_ips.list
+# 仅处理裸 IP/无 DNS 场景的静态兜底地址。通过企业域名访问时，
+# 由 lenovo_dns_nftset.sh 和 dnsmasq nftset 自动学习解析结果。
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -54,7 +44,6 @@ delete_old_rules() {
         done
 }
 
-# 检查配置文件
 if [ ! -f "$INTRANET_LIST" ]; then
     log_msg "Error: config not found: $INTRANET_LIST"
     return 1 2>/dev/null || exit 1
@@ -69,13 +58,12 @@ IP_ELEMENTS=$(
 )
 
 if [ -z "$IP_ELEMENTS" ]; then
-    log_msg "Warning: no IPs found in $INTRANET_LIST"
+    log_msg "Warning: no static IPs found in $INTRANET_LIST"
     return 0 2>/dev/null || exit 0
 fi
 
-log_msg "Loading IPs: $IP_ELEMENTS"
+log_msg "Loading static IPs: $IP_ELEMENTS"
 
-# 等待 OpenClash nftables 链就绪，然后创建 set 并插入规则
 insert_rules() {
     local retry=0
 
@@ -107,7 +95,7 @@ insert_rules() {
                 comment "\"$RULE_COMMENT\"" 2>/dev/null
             log_msg "mangle_output rule inserted"
 
-            log_msg "Done"
+            log_msg "Static rules ready"
             return 0
         fi
 
@@ -120,7 +108,5 @@ insert_rules() {
     return 1
 }
 
-# 后台执行等待+插入，不阻塞 OpenClash 启动流程
 insert_rules &
-
 log_msg "Started (background)"
