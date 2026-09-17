@@ -1,33 +1,17 @@
 # proxy_config
 
-OpenClash (Clash Meta / mihomo) 代理配置仓库，用于 iStoreOS 环境。
+OpenClash / mihomo 公开规则仓库。仅发布自定义规则、上游规则及内网单点 IP 清单，不保存节点、订阅、完整配置、认证信息或环境部署脚本。
+
+完整配置及运维文件已迁入独立私有仓库 `zhuxu222/openclash_private`。本仓库的规则路径保持不变，OpenClash 可以继续匿名下载，不需要私有仓库访问令牌。
 
 ## 目录结构
 
-```
-proxy_config/
-├── config/                              # OpenClash 配置文件
-│   └── config_in_config.yaml            # 种子配置（proxies + proxy-groups）
-│
-├── rule_provider/                       # 规则集
-│   ├── custom/                          # 自定义规则集
-│   │   ├── Docker.yaml                  # Docker/容器注册表域名
-│   │   ├── HuggingFace.yaml             # Hugging Face 页面与资源下载域名
-│   │   └── AI.yaml                      # AI 平台域名（补充 AI Suite）
-│   └── upstream/                        # 上游规则集（自动同步自 dler-io/Rules）
-│       ├── AdBlock.yaml
-│       ├── Netflix.yaml
-│       ├── Telegram.yaml
-│       └── ...                          # 共 62 个规则集
-│
-├── docs/                                # 文档
-│   └── config_running_annotated.yaml    # 带完整注释的运行配置参考
-│
-├── scripts/                             # 辅助脚本
-│   └── download_upstream.ps1            # 本地下载上游规则集（PowerShell）
-│
-└── .github/workflows/
-    └── sync-rules.yml                   # GitHub Actions：每周自动同步上游规则集
+```text
+rule_provider/custom/                    自定义规则
+rule_provider/upstream/                  上游规则
+openclash/custom/lenovo_intranet_ips.list 静态内网单点 IP 例外
+scripts/                                公开规则下载与校验
+.github/workflows/                      校验与上游同步
 ```
 
 ## 使用方法
@@ -78,15 +62,30 @@ push 后如需立即生效：
 https://purge.jsdelivr.net/gh/zhuxu222/proxy_config@main/rule_provider/custom/Docker.yaml
 ```
 
+## Lenovo/Moto 内网例外
+
+企业域名与静态 IP 规则位于 `rule_provider/custom/Lenovo.yaml`，裸 IP 兜底清单位于 `openclash/custom/lenovo_intranet_ips.list`。两者的 IPv4 单点集合必须一致，不自动扩大为宽网段。内网 IP 按维护者决定公开，认证信息和节点配置不属于公开规则。
+
+域名检查工具和路由器部署脚本已移入私有仓库，并默认引用本仓库中的规则文件。规则是唯一维护源，私有快照只用于历史恢复。
+
+## 提交检查
+
+```sh
+python3 -m pip install -r requirements-validation.txt
+python3 -m unittest discover -s scripts -p 'test_validate_public.py'
+python3 scripts/validate_public.py
+git config core.hooksPath .githooks
+```
+
+钩子检查暂存区的文件白名单、规则 YAML 结构、内网清单一致性和常见配置/凭据模式。可通过 `PYTHON` 环境变量选择安装了 PyYAML 的解释器。Git 钩子不会自动随 clone 启用，新工作目录需要执行上面的配置命令。
+
+CI 再次执行同样检查。CI 是提交后的检测，不能撤回已泄漏的凭据；发布前必须检查暂存路径与差异，禁止强制加入本地配置。此检查不能替代凭据扫描、人工审查和 GitHub 分支保护。
+
 ## 同步机制
 
 - **GitHub Actions** 每周一自动从 [dler-io/Rules](https://github.com/dler-io/Rules) 同步上游规则集
 - 也可在 GitHub Actions 页面手动触发同步
-- 本地可运行 `scripts/download_upstream.ps1` 手动更新
-
-## 协议栈
-
-- **代理协议**: VLESS + REALITY
-- **内核**: Clash Meta (mihomo)
-- **管理面板**: OpenClash on iStoreOS
-- **Web UI**: MetaCubeXD
+- 下载错误或校验失败时停止提交，不发布错误页面或部分失败的更新
+- 同步任务只拥有本公开仓库的写权限，不读取私有配置或持有其凭据
+- 本地可运行 `scripts/download_upstream.ps1` 手动下载，提交前仍需完整校验
+- `@main` CDN 缓存可能延迟；需要可复现部署时使用已验证的提交 SHA，并记录版本
